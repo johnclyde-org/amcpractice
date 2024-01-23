@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Online Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #timer { position: fixed; top: 10px; right: 10px; font-size: 20px; color: blue; }
+        .question {
+            display: inline-block;
+            border: 1px solid #999999;
+            width: 26px;
+            height: 31px;
+            color: #666666;
+            text-align: center;
+            margin: 5px;
+            line-height: 31px;
+            cursor: pointer;
+            background-color: #fff;
+            font-size: 16px;
+        }
+        .question:hover {
+            background-color: #f0f0f0;
+        }
+        #reviewSection { margin: 10px; }
+        /* Additional styles as needed */
+    </style>
+</head>
+<body>
+    <div id="timer"></div>
+    <button id="toggleTimer">Unpause</button>
+    <div id="reviewSection">
+        <strong>Review</strong>
+        <div id="questions">
+            <!-- Questions will be added here by JavaScript -->
+        </div>
+    </div>
+    <script>
+        var timerRunning = false;
+        var seconds = 0;
+        var interval;
+
+        function updateTimer() {
+            var currentTime = new Date();
+            document.getElementById("timer").innerText = "Current Time: " + currentTime.toLocaleTimeString() +
+                ", Elapsed Time: " + seconds + " seconds";
+            if (timerRunning) seconds++;
+        }
+
+        function toggleTimer() {
+            if (!timerRunning) {
+                interval = setInterval(updateTimer, 1000);
+                timerRunning = true;
+                document.getElementById("toggleTimer").innerText = "Pause";
+            } else {
+                timerRunning = false;
+                document.getElementById("toggleTimer").innerText = "Unpause";
+            }
+        }
+
+        document.getElementById("toggleTimer").addEventListener("click", toggleTimer);
+
+        function navigateToQuestion(questionNumber) {
+            console.log("Navigating to question " + questionNumber);
+            // Replace with your actual navigation logic
+        }
+
+        function generateQuestions() {
+            var questionsContainer = document.getElementById("questions");
+            for (var i = 1; i <= 15; i++) {
+                var questionSpan = document.createElement("span");
+                questionSpan.className = "question";
+                questionSpan.innerText = i;
+                questionSpan.onclick = function() { navigateToQuestion(this.innerText); };
+                questionsContainer.appendChild(questionSpan);
+            }
+        }
+
+        generateQuestions();
+        updateTimer(); // Initialize the timer display
+    </script>
+</body>
+</html>
