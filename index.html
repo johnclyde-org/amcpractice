@@ -28,6 +28,7 @@
 <body>
     <div id="timer"></div>
     <button id="toggleTimer">Unpause</button>
+    <button id="importTest">Import Test</button>
     <div id="reviewSection">
         <strong>Review</strong>
         <div id="questions">
@@ -63,6 +64,26 @@
             console.log("Navigating to question " + questionNumber);
             // Replace with your actual navigation logic
         }
+
+        document.getElementById("importTest").addEventListener("click", function() {
+            var jsonInput = prompt("Paste JSON for the new test:");
+            if (jsonInput === null) {
+                // Do nothing.
+            } else if (jsonInput) {
+                try {
+                    var jsonData = JSON.parse(jsonInput);
+                    var existingTests = localStorage.getItem("testData");
+                    var tests = existingTests ? JSON.parse(existingTests) : [];
+                    tests.push(jsonData);
+                    localStorage.setItem("testData", JSON.stringify(tests));
+                    alert("Test imported successfully.");
+                } catch (error) {
+                    alert("Error parsing JSON: " + error);
+                }
+            } else {
+                alert("No JSON input.");
+            }
+        });
 
         function generateQuestions() {
             var questionsContainer = document.getElementById("questions");
