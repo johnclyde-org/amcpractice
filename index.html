@@ -21,6 +21,17 @@
         .question:hover {
             background-color: #f0f0f0;
         }
+        #testSelectModal {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
         #reviewSection { margin: 10px; }
         /* Additional styles as needed */
     </style>
@@ -29,6 +40,14 @@
     <div id="timer"></div>
     <button id="toggleTimer">Unpause</button>
     <button id="importTest">Import Test</button>
+    <button id="switchTest">Switch Test</button>
+
+    <div id="testSelectModal" style="display:none;">
+        <select id="testSelect"></select>
+        <button id="confirmTestSelection">Select</button>
+        <button id="cancelTestSelection">Cancel</button>
+    </div>
+
     <div id="reviewSection">
         <strong>Review</strong>
         <div id="questions">
@@ -83,6 +102,38 @@
             } else {
                 alert("No JSON input.");
             }
+        });
+
+        function populateTestDropdown() {
+            var tests = JSON.parse(localStorage.getItem("testData") || "[]");
+            var testSelect = document.getElementById("testSelect");
+            testSelect.innerHTML = ""; // Clear existing options
+            tests.forEach(function(test, index) {
+                var option = document.createElement("option");
+                option.value = index;
+                option.textContent = test.set_label || `Test ${index + 1}`;
+                testSelect.appendChild(option);
+            });
+        }
+
+        document.getElementById("switchTest").addEventListener("click", function() {
+            populateTestDropdown();
+            document.getElementById("testSelectModal").style.display = "block";
+        });
+
+        document.getElementById("confirmTestSelection").addEventListener("click", function() {
+            var selectedTestIndex = document.getElementById("testSelect").value;
+            var tests = JSON.parse(localStorage.getItem("testData") || "[]");
+            if (tests[selectedTestIndex]) {
+                // Set the current test logic here
+                console.log("Current test set to:", tests[selectedTestIndex].set_label);
+                document.getElementById("testSelectModal").style.display = "none";
+                // Implement the rendering of the selected test
+            }
+        });
+
+        document.getElementById("cancelTestSelection").addEventListener("click", function() {
+            document.getElementById("testSelectModal").style.display = "none";
         });
 
         function generateQuestions() {
