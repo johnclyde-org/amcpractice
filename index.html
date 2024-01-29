@@ -87,6 +87,53 @@
 
         document.getElementById("toggleTimer").addEventListener("click", toggleTimer);
 
+        function recordAction(testLabel, questionLabel, action, value) {
+            var testsData = JSON.parse(localStorage.getItem("userActions")) || {};
+            if (!testsData[testLabel]) {
+                testsData[testLabel] = {};
+            }
+            if (!testsData[testLabel][questionLabel]) {
+                testsData[testLabel][questionLabel] = [];
+            }
+            var entry = { timestamp: new Date().toISOString(), action: action, value: value };
+            testsData[testLabel][questionLabel].push(entry);
+            localStorage.setItem("userActions", JSON.stringify(testsData));
+        }
+
+        function createActionButtons(questionLabel) {
+            var buttonsContainer = document.createElement('div');
+            var guessButton = document.createElement('button');
+            guessButton.innerText = 'Guess';
+            var solveButton = document.createElement('button');
+            solveButton.innerText = 'Solve';
+            var tldrButton = document.createElement('button');
+            tldrButton.innerText = 'TLDR';
+
+            guessButton.onclick = function() {
+                var guess = prompt("Your guess for " + questionLabel + ":");
+                if (guess !== null) {
+                    recordAction(currentTestData.set_label, questionLabel, "guess", guess);
+                }
+            };
+
+            solveButton.onclick = function() {
+                var solution = prompt("Your solution for " + questionLabel + ":");
+                if (solution !== null) {
+                    recordAction(currentTestData.set_label, questionLabel, "solve", solution);
+                }
+            };
+
+            tldrButton.onclick = function() {
+                recordAction(currentTestData.set_label, questionLabel, "tldr", "Marked as TLDR");
+                // Implement navigation to the next problem here
+            };
+
+            buttonsContainer.appendChild(guessButton);
+            buttonsContainer.appendChild(solveButton);
+            buttonsContainer.appendChild(tldrButton);
+            return buttonsContainer;
+        }
+
         function navigateToQuestion(questionLabel) {
             // Highlight the selected question.
             var questionSpans = document.querySelectorAll('.question')
@@ -101,6 +148,9 @@
             // Highlight the selected question.
             var questionImage = document.getElementById('questionImage');
             questionImage.innerHTML = '';  // Clear previous image.
+
+            // Add action buttons above the image.
+            questionImage.appendChild(createActionButtons(questionLabel));
             var selectedProblem = currentTestData.problems.find(function(p) {
                 return p.label === questionLabel;
             });
@@ -111,6 +161,9 @@
                  imgElement.alt = selectedProblem.alternate_text || "Specify alternate_text in the problem JSON next time...";
                  questionImage.appendChild(imgElement);
             }
+
+            // Add action buttons below the image.
+            questionImage.appendChild(createActionButtons(questionLabel));
         }
 
         document.getElementById("importSaveState").addEventListener("click", function() {
