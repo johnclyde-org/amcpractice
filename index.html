@@ -121,31 +121,37 @@
             document.getElementById("testSelectModal").style.display = "block";
         });
 
-        document.getElementById("confirmTestSelection").addEventListener("click", function() {
-            var selectedTestIndex = document.getElementById("testSelect").value;
-            var tests = JSON.parse(localStorage.getItem("testData") || "[]");
-            if (tests[selectedTestIndex]) {
-                // Set the current test logic here
-                console.log("Current test set to:", tests[selectedTestIndex].set_label);
-                document.getElementById("testSelectModal").style.display = "none";
-                // Implement the rendering of the selected test
-            }
-        });
-
         document.getElementById("cancelTestSelection").addEventListener("click", function() {
             document.getElementById("testSelectModal").style.display = "none";
         });
 
+        var currentTestData = null;
+
         function generateQuestions() {
+            if (!currentTestData) {
+                return;
+            }
             var questionsContainer = document.getElementById("questions");
-            for (var i = 1; i <= 15; i++) {
+            questionsContainer.innerHTML = '';
+            currentTestData.problems.forEach(function(problem) {
                 var questionSpan = document.createElement("span");
                 questionSpan.className = "question";
-                questionSpan.innerText = i;
+                questionSpan.innerText = problem.label;
                 questionSpan.onclick = function() { navigateToQuestion(this.innerText); };
                 questionsContainer.appendChild(questionSpan);
-            }
+            });
         }
+
+        document.getElementById("confirmTestSelection").addEventListener("click", function() {
+            var selectedTestIndex = document.getElementById("testSelect").value;
+            var tests = JSON.parse(localStorage.getItem("testData") || "[]");
+            if (tests[selectedTestIndex]) {
+                currentTestData = tests[selectedTestIndex];
+                console.log("Current test set to:", currentTestData.set_label);
+                generateQuestions();
+                document.getElementById("testSelectModal").style.display = "none";
+            }
+        });
 
         generateQuestions();
         updateTimer(); // Initialize the timer display
