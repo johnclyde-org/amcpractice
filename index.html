@@ -43,7 +43,8 @@
 <body>
     <div id="timer"></div>
     <button id="toggleTimer">Unpause</button>
-    <button id="importTest">Import Test</button>
+    <button id="importSaveState">Import Save State</button>
+    <button id="exportSaveState">Export Save State</button>
     <button id="switchTest">Switch Test</button>
 
     <div id="testSelectModal" style="display:none;">
@@ -112,12 +113,13 @@
             }
         }
 
-        document.getElementById("importTest").addEventListener("click", function() {
-            var jsonInput = prompt("Paste JSON for the new test:");
-            if (jsonInput === null) {
+        document.getElementById("importSaveState").addEventListener("click", function() {
+            var base64Input = prompt("Input your save state here:");
+            if (base64Input === null) {
                 // Do nothing.
-            } else if (jsonInput) {
+            } else if (base64Input) {
                 try {
+                    var jsonInput = atob(base64Input);
                     var jsonData = JSON.parse(jsonInput);
                     var existingTests = localStorage.getItem("testData");
                     var tests = existingTests ? JSON.parse(existingTests) : [];
@@ -128,7 +130,21 @@
                     alert("Error parsing JSON: " + error);
                 }
             } else {
-                alert("No JSON input.");
+                alert("No input.");
+            }
+        });
+
+        document.getElementById("exportSaveState").addEventListener("click", function() {
+            var existingTests = localStorage.getItem("testData");
+            if (!existingTests) {
+                alert("No save state to export.");
+            } else {
+                try {
+                    var base64Data = btoa(existingTests);
+                    prompt("Copy your save state: ", base64Data);
+                } catch (error) {
+                    alert("Error encoding data: " + error);
+                }
             }
         });
 
