@@ -18,6 +18,10 @@
             background-color: #fff;
             font-size: 16px;
         }
+        .question.selected {
+            background-color: #b0c4de;
+            color: #000000;
+        }
         .question:hover {
             background-color: #f0f0f0;
         }
@@ -54,6 +58,9 @@
             <!-- Questions will be added here by JavaScript -->
         </div>
     </div>
+    <div id="questionImage">
+        <!-- Image for the selected problem -->
+    </div>
     <script>
         var timerRunning = false;
         var seconds = 0;
@@ -79,9 +86,30 @@
 
         document.getElementById("toggleTimer").addEventListener("click", toggleTimer);
 
-        function navigateToQuestion(questionNumber) {
-            console.log("Navigating to question " + questionNumber);
-            // Replace with your actual navigation logic
+        function navigateToQuestion(questionLabel) {
+            // Highlight the selected question.
+            var questionSpans = document.querySelectorAll('.question')
+            questionSpans.forEach(function(span) {
+                if (span.innerText === questionLabel) {
+                    span.classList.add('selected');
+                } else {
+                    span.classList.remove('selected');
+                }
+            });
+
+            // Highlight the selected question.
+            var questionImage = document.getElementById('questionImage');
+            questionImage.innerHTML = '';  // Clear previous image.
+            var selectedProblem = currentTestData.problems.find(function(p) {
+                return p.label === questionLabel;
+            });
+            console.log("Navigating to question " + questionLabel);
+            if (selectedProblem && selectedProblem.link) {
+                 var imgElement = document.createElement('img');
+                 imgElement.src = selectedProblem.link;
+                 imgElement.alt = selectedProblem.alternate_text || "Specify alternate_text in the problem JSON next time...";
+                 questionImage.appendChild(imgElement);
+            }
         }
 
         document.getElementById("importTest").addEventListener("click", function() {
@@ -128,7 +156,7 @@
         var currentTestData = null;
 
         function generateQuestions() {
-            if (!currentTestData) {
+            if (!currentTestData || !currentTestData.problems) {
                 return;
             }
             var questionsContainer = document.getElementById("questions");
