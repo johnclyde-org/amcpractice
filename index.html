@@ -25,6 +25,10 @@
         .question:hover {
             background-color: #f0f0f0;
         }
+        #testDropdown {
+            display: inline-block;
+            margin-left: 5px;
+        }
         #testSelectModal {
             position: fixed;
             left: 50%;
@@ -36,21 +40,24 @@
             box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
             z-index: 1000;
         }
+        #controls {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Adjust the space between elements */
+        }
         #reviewSection { margin: 10px; }
         /* Additional styles as needed */
     </style>
 </head>
 <body>
-    <div id="timer"></div>
-    <button id="toggleTimer">Unpause</button>
-    <button id="importSaveState">Import Save State</button>
-    <button id="exportSaveState">Export Save State</button>
-    <button id="switchTest">Switch Test</button>
-
-    <div id="testSelectModal" style="display:none;">
-        <select id="testSelect"></select>
-        <button id="confirmTestSelection">Select</button>
-        <button id="cancelTestSelection">Cancel</button>
+    <div id="controls">
+        <div id="timer"></div>
+        <button id="toggleTimer">Unpause</button>
+        <button id="importSaveState">Import Save State</button>
+        <button id="exportSaveState">Export Save State</button>
+        <select id="testDropdown" style="display: inline-block;" onchange="changeTest(this.value)">
+            <!-- Options will be added here by JavaScript -->
+        </select>
     </div>
 
     <div id="reviewSection">
@@ -209,6 +216,7 @@
 
                     // Update localStorage with the final 'tests' array
                     localStorage.setItem("testData", JSON.stringify(tests));
+                    populateTestDropdown();
                     alert("Test imported successfully.");
                 } catch (error) {
                     alert("Error parsing input: " + error);
@@ -234,24 +242,30 @@
 
         function populateTestDropdown() {
             var tests = JSON.parse(localStorage.getItem("testData") || "[]");
-            var testSelect = document.getElementById("testSelect");
-            testSelect.innerHTML = ""; // Clear existing options
+            var dropdown = document.getElementById("testDropdown");
+            dropdown.innerHTML = ""; // Clear existing options
             tests.forEach(function(test, index) {
                 var option = document.createElement("option");
                 option.value = index;
                 option.textContent = test.set_label || `Test ${index + 1}`;
-                testSelect.appendChild(option);
+                dropdown.appendChild(option);
             });
+            var rect = this.getBoundingClientRect();
+            dropdown.style.left = rect.left + 'px';
+            dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
+            dropdown.style.display = "block";
         }
 
-        document.getElementById("switchTest").addEventListener("click", function() {
-            populateTestDropdown();
-            document.getElementById("testSelectModal").style.display = "block";
-        });
-
-        document.getElementById("cancelTestSelection").addEventListener("click", function() {
-            document.getElementById("testSelectModal").style.display = "none";
-        });
+        function changeTest(selectedIndex) {
+            var tests = JSON.parse(localStorage.getItem("testData") || "[]");
+            if (tests[selectedIndex]) {
+                currentTestData = tests[selectedIndex];
+                console.log("Current test set to:", currentTestData.set_label);
+                document.title = "Practice Exam: " + currentTestData.set_label;
+                generateQuestions();
+                navigateToQuestion(currentTestData.problems[0].label);
+            }
+        }
 
         var currentTestData = null;
 
@@ -270,19 +284,8 @@
             });
         }
 
-        document.getElementById("confirmTestSelection").addEventListener("click", function() {
-            var selectedTestIndex = document.getElementById("testSelect").value;
-            var tests = JSON.parse(localStorage.getItem("testData") || "[]");
-            if (tests[selectedTestIndex]) {
-                currentTestData = tests[selectedTestIndex];
-                console.log("Current test set to:", currentTestData.set_label);
-                generateQuestions();
-                document.getElementById("testSelectModal").style.display = "none";
-                navigateToQuestion(currentTestData.problems[0].label);
-            }
-        });
-
         generateQuestions();
+        populateTestDropdown();
         updateTimer(); // Initialize the timer display
     </script>
 </body>
