@@ -164,6 +164,7 @@
 
             // Add action buttons below the image.
             questionImage.appendChild(createActionButtons(questionLabel));
+            recordAction(currentTestData.set_label, questionLabel, "open", "Opened");
         }
 
         document.getElementById("importSaveState").addEventListener("click", function() {
