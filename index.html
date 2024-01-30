@@ -117,11 +117,9 @@
         var questionStatus = {};
 
         function updateQuestionButtonBackground(label, color) {
-            console.log("label is ", label, "color is", color);
             var questionButtons = Array.from(document.querySelectorAll('.questionButton'));
             var questionButton = questionButtons.find(button => button.innerText === label);
             if (questionButton) {
-                console.log("Color set to ", color);
                 questionButton.style.backgroundColor = color;
             }
         }
