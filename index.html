@@ -167,20 +167,28 @@
         }
 
         document.getElementById("importSaveState").addEventListener("click", function() {
-            var base64Input = prompt("Input your save state here:");
-            if (base64Input === null) {
+            var input = prompt("Input your save state here:");
+            if (input === null) {
                 // Do nothing.
-            } else if (base64Input) {
+            } else if (input) {
                 try {
-                    var jsonInput = atob(base64Input);
-                    var jsonData = JSON.parse(jsonInput);
+                    // Check if input is already JSON
+                    var jsonData;
+                    try {
+                        jsonData = JSON.parse(input);
+                    } catch (e) {
+                        // If error, input is not JSON, try base64 decode then parse as JSON
+                        var jsonInput = atob(input);
+                        jsonData = JSON.parse(jsonInput);
+                    }
+
                     var existingTests = localStorage.getItem("testData");
                     var tests = existingTests ? JSON.parse(existingTests) : [];
                     tests.push(jsonData);
                     localStorage.setItem("testData", JSON.stringify(tests));
                     alert("Test imported successfully.");
                 } catch (error) {
-                    alert("Error parsing JSON: " + error);
+                    alert("Error parsing input: " + error);
                 }
             } else {
                 alert("No input.");
