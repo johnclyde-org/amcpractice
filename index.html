@@ -5,7 +5,7 @@
     <style>
         body { font-family: Arial, sans-serif; }
         #timer { position: fixed; top: 10px; right: 10px; font-size: 20px; color: blue; }
-        .question {
+        .questionButton {
             display: inline-block;
             border: 1px solid #999999;
             width: 26px;
@@ -18,11 +18,11 @@
             background-color: #fff;
             font-size: 16px;
         }
-        .question.selected {
+        .questionButton.selected {
             background-color: #b0c4de;
             color: #000000;
         }
-        .question:hover {
+        .questionButton:hover {
             background-color: #f0f0f0;
         }
         #testDropdown {
@@ -107,6 +107,29 @@
             localStorage.setItem("userActions", JSON.stringify(testsData));
         }
 
+        function navigateToNextQuestion(currentLabel) {
+            var currentIndex = currentTestData.problems.findIndex(p => p.label === currentLabel);
+            if (currentIndex >= 0 && currentIndex < currentTestData.problems.length - 1) {
+                navigateToQuestion(currentTestData.problems[currentIndex + 1].label);
+            }
+        }
+
+        var questionStatus = {};
+
+        function updateQuestionButtonBackground(label, color) {
+            console.log("label is ", label, "color is", color);
+            var questionButtons = Array.from(document.querySelectorAll('.questionButton'));
+            var questionButton = questionButtons.find(button => button.innerText === label);
+            if (questionButton) {
+                console.log("Color set to ", color);
+                questionButton.style.backgroundColor = color;
+            }
+        }
+
+        function updateQuestionStatus(label, status) {
+            questionStatus[label] = status;
+        }
+
         function createActionButtons(questionLabel) {
             var buttonsContainer = document.createElement('div');
             var guessButton = document.createElement('button');
@@ -115,11 +138,15 @@
             solveButton.innerText = 'Solve';
             var tldrButton = document.createElement('button');
             tldrButton.innerText = 'TLDR';
+            // updateQuestionButtonBackground(questionLabel);
 
             guessButton.onclick = function() {
                 var guess = prompt("Your guess for " + questionLabel + ":");
                 if (guess !== null) {
                     recordAction(currentTestData.set_label, questionLabel, "guess", guess);
+                    updateQuestionStatus(questionLabel, "guessed");
+                    updateQuestionButtonBackground(questionLabel, "yellow");
+                    navigateToNextQuestion(questionLabel);
                 }
             };
 
@@ -127,12 +154,17 @@
                 var solution = prompt("Your solution for " + questionLabel + ":");
                 if (solution !== null) {
                     recordAction(currentTestData.set_label, questionLabel, "solve", solution);
+                    updateQuestionStatus(questionLabel, "solved");
+                    updateQuestionButtonBackground(questionLabel, "lightblue");
+                    navigateToNextQuestion(questionLabel);
                 }
             };
 
             tldrButton.onclick = function() {
                 recordAction(currentTestData.set_label, questionLabel, "tldr", "Marked as TLDR");
-                // Implement navigation to the next problem here
+                updateQuestionStatus(questionLabel, "tldr");
+                updateQuestionButtonBackground(questionLabel, "#D2B48C");
+                navigateToNextQuestion(questionLabel);
             };
 
             buttonsContainer.appendChild(guessButton);
@@ -161,7 +193,6 @@
             var selectedProblem = currentTestData.problems.find(function(p) {
                 return p.label === questionLabel;
             });
-            console.log("Navigating to question " + questionLabel);
             if (selectedProblem && selectedProblem.link) {
                  var imgElement = document.createElement('img');
                  imgElement.src = selectedProblem.link;
@@ -250,10 +281,6 @@
                 option.textContent = test.set_label || `Test ${index + 1}`;
                 dropdown.appendChild(option);
             });
-            var rect = this.getBoundingClientRect();
-            dropdown.style.left = rect.left + 'px';
-            dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
-            dropdown.style.display = "block";
         }
 
         function changeTest(selectedIndex) {
@@ -277,7 +304,7 @@
             questionsContainer.innerHTML = '';
             currentTestData.problems.forEach(function(problem) {
                 var questionSpan = document.createElement("span");
-                questionSpan.className = "question";
+                questionSpan.className = "questionButton";
                 questionSpan.innerText = problem.label;
                 questionSpan.onclick = function() { navigateToQuestion(this.innerText); };
                 questionsContainer.appendChild(questionSpan);
