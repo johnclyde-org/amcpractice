@@ -169,29 +169,51 @@
         document.getElementById("importSaveState").addEventListener("click", function() {
             var input = prompt("Input your save state here:");
             if (input === null) {
-                // Do nothing.
+                // User cancelled the prompt, do nothing.
             } else if (input) {
                 try {
-                    // Check if input is already JSON
                     var jsonData;
                     try {
-                        jsonData = JSON.parse(input);
+                        jsonData = JSON.parse(input); // Direct JSON input
                     } catch (e) {
-                        // If error, input is not JSON, try base64 decode then parse as JSON
-                        var jsonInput = atob(input);
+                        var jsonInput = atob(input); // Base64 input
                         jsonData = JSON.parse(jsonInput);
                     }
 
                     var existingTests = localStorage.getItem("testData");
                     var tests = existingTests ? JSON.parse(existingTests) : [];
-                    tests.push(jsonData);
+
+                    var replaceData = false;
+                    var promptReplace = false;
+
+                    if (Array.isArray(jsonData)) {
+                        // Check if any entry in the array has 'set_label'
+                        replaceData = jsonData.some(entry => entry.hasOwnProperty('set_label'));
+                        promptReplace = replaceData; // Prompt for replacement if any entry has 'set_label'
+                    } else if (jsonData.hasOwnProperty('set_label')) {
+                        // Single object with 'set_label' should append
+                        promptReplace = false; // No prompt needed for appending single entry
+                        tests.push(jsonData); // Append the single entry
+                    }
+
+                    // If replacement is needed, prompt the user for confirmation
+                    if (promptReplace) {
+                        var confirmReplace = confirm("If you hit confirm your existing data will be GONE - otherwise the new data will be appended to what is there.");
+                        if (confirmReplace) {
+                            tests = jsonData; // Replace with new data
+                        } else {
+                            tests = tests.concat(jsonData);
+                        }
+                    }
+
+                    // Update localStorage with the final 'tests' array
                     localStorage.setItem("testData", JSON.stringify(tests));
                     alert("Test imported successfully.");
                 } catch (error) {
                     alert("Error parsing input: " + error);
                 }
             } else {
-                alert("No input.");
+                alert("No input provided.");
             }
         });
 
@@ -255,6 +277,7 @@
                 console.log("Current test set to:", currentTestData.set_label);
                 generateQuestions();
                 document.getElementById("testSelectModal").style.display = "none";
+                navigateToQuestion(currentTestData.problems[0].label);
             }
         });
 
