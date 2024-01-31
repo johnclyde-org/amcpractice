@@ -55,6 +55,7 @@
         <button id="toggleTimer">Unpause</button>
         <button id="importSaveState">Import Save State</button>
         <button id="exportSaveState">Export Save State</button>
+        <button id="exportUserActions">Download Your Answers</button>
         <select id="testDropdown" style="display: inline-block;" onchange="changeTest(this.value)">
             <!-- Options will be added here by JavaScript -->
         </select>
@@ -200,6 +201,68 @@
             questionImage.appendChild(createActionButtons(questionLabel));
             recordAction(currentTestData.set_label, questionLabel, "open", "Opened");
         }
+
+        function exportUserActionsAsText() {
+            var userActionsByTest = JSON.parse(localStorage.getItem("userActions"));
+            if (!userActionsByTest) {
+                alert("No user actions to export.");
+                return;
+            }
+            var userActions = [];
+            if (currentTestData.set_label in userActionsByTest) {
+                userActions = userActionsByTest[currentTestData.set_label];
+            }
+
+            var textData = "";
+            var lastDate = null;
+            for (var question in userActions) {
+                var actions = userActions[question];
+                var questionData = `\nQuestion ${question}:\n`;
+
+                var openedTime = null;
+                actions.forEach(function(action) {
+                    var timestamp = new Date(action.timestamp);
+                    var dateStr = timestamp.toLocaleDateString();
+                    var timeStr = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+                    if (lastDate !== dateStr) {
+                        textData += `Date: ${dateStr}\n`;
+                        lastDate = dateStr;
+                    }
+
+                    var actionText = `${timeStr} ${action.action}`;
+                    if (action.action === "solve") {
+                        actionText = `    Submitted answer '${action.value}'`;
+                    } else if (action.action === "guess") {
+                        actionText = `    Submitted a guess '${action.value}'`;
+                    } else if (action.action === "tldr") {
+                        actionText = "    Marked TL;DR";
+                    } else if (action.action === "open") {
+                        actionText = `  ${timeStr} Opened problem ${question}`;
+                        openedTime = timestamp;
+                    }
+
+                    if (openedTime && ["solve", "guess", "tldr"].includes(action.action)) {
+                        duration = (timestamp - openedTime) / 1000;
+                        actionText += ` after ${duration.toFixed(1)} seconds`;
+                    }
+                    questionData += `${actionText}.\n`;
+                });
+                textData += questionData;
+            }
+
+            var blob = new Blob([textData], { type: "text/plain;charset=utf-8" });
+            var url = URL.createObjectURL(blob);
+
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'userActions.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        document.getElementById("exportUserActions").addEventListener("click", exportUserActionsAsText);
 
         document.getElementById("importSaveState").addEventListener("click", function() {
             var input = prompt("Input your save state here:");
