@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Image Slicer</title>
+<style>
+    .container {
+        display: flex;
+        align-items: center;
+    }
+
+    .vertical-slider {
+        transform: rotate(90deg);
+        width: 300px;
+    }
+
+    canvas {
+        margin-left: 20px; /* Adds some space between the slider and the canvases */
+    }
+
+    #line {
+        width: 100%;
+        height: 2px;
+        background-color: black;
+        margin: 10px 0;
+    }
+
+</style>
+</head>
+<body>
+<img id="sourceImage" style="display:none;">
+
+<div class="container">
+    <div>
+        <input type="text" id="imageUrl" placeholder="https://i.imgur.com/???????.png">
+        <button id="loadImage">Load Image</button>
+    </div>
+    <!-- Vertical slider -->
+    <div style="height: 300px;">
+        <input type="range" id="yCoordinate" min="0" max="100" value="50" class="vertical-slider">
+    </div>
+
+    <!-- Canvases for displaying the image parts -->
+    <div>
+        <canvas id="topCanvas"></canvas>
+        <div id="line"></div>
+        <canvas id="bottomCanvas"></canvas>
+    </div>
+</div>
+
+<script>
+document.getElementById('loadImage').addEventListener('click', function() {
+    const imageUrl = document.getElementById('imageUrl').value;
+    if (imageUrl) {
+        sourceImage.src = imageUrl;
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const sourceImage = document.getElementById('sourceImage');
+    const yCoordinate = document.getElementById('yCoordinate');
+    const topCanvas = document.getElementById('topCanvas');
+    const bottomCanvas = document.getElementById('bottomCanvas');
+
+    const ctxTop = topCanvas.getContext('2d');
+    const ctxBottom = bottomCanvas.getContext('2d');
+
+    sourceImage.onload = function() {
+        // Set canvas dimensions after image is loaded.
+        topCanvas.width = bottomCanvas.width = sourceImage.naturalWidth;
+        topCanvas.height = bottomCanvas.height = sourceImage.naturalHeight / 2;
+
+        // Adjust max value based on image height
+        yCoordinate.max = sourceImage.naturalHeight;
+        updateCanvas();
+    };
+
+    function updateCanvas() {
+        const chopPoint = yCoordinate.value;
+
+        // Clear canvases
+        ctxTop.clearRect(0, 0, topCanvas.width, topCanvas.height);
+        ctxBottom.clearRect(0, 0, bottomCanvas.width, bottomCanvas.height);
+
+        topCanvas.height = chopPoint;
+        bottomCanvas.height = sourceImage.naturalHeight - chopPoint;
+
+        // Draw top part
+        ctxTop.drawImage(sourceImage, 0, 0, sourceImage.naturalWidth, chopPoint, 0, 0, topCanvas.width, chopPoint);
+
+        // Draw bottom part
+        ctxBottom.drawImage(sourceImage, 0, chopPoint, sourceImage.naturalWidth, sourceImage.naturalHeight, 0, 0, bottomCanvas.width, sourceImage.naturalHeight);
+    }
+
+    yCoordinate.addEventListener('input', updateCanvas);
+});
+</script>
+</body>
+</html>
