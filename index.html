@@ -181,7 +181,6 @@
                 }
             });
 
-            // Highlight the selected question.
             var questionImage = document.getElementById('questionImage');
             questionImage.innerHTML = '';  // Clear previous image.
 
@@ -272,12 +271,29 @@
             var tests = JSON.parse(localStorage.getItem("testData") || "[]");
             var dropdown = document.getElementById("testDropdown");
             dropdown.innerHTML = ""; // Clear existing options
+
+            // Add 'Select Test' default option.
+            var defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.textContent = "Select Test";
+            dropdown.appendChild(defaultOption);
+
+            var currentTestExists = false;
             tests.forEach(function(test, index) {
                 var option = document.createElement("option");
                 option.value = index;
                 option.textContent = test.set_label || `Test ${index + 1}`;
                 dropdown.appendChild(option);
+                if (currentTestData && test.set_label === currentTestData.set_label) {
+                    currentTestExists = true;
+                    dropdown.value = index;
+                }
             });
+
+            // Select 'Select Test' if current test is not in dropdown.
+            if (!currentTestExists) {
+                dropdown.value = "";
+            }
         }
 
         function changeTest(selectedIndex) {
