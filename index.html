@@ -322,7 +322,7 @@
                 alert("No save state to export.");
             } else {
                 try {
-                    var base64Data = btoa(existingTests);
+                    var base64Data = btoa(JSON.stringify(existingTests));
                     prompt("Copy your save state: ", base64Data);
                 } catch (error) {
                     alert("Error encoding data: " + error);
