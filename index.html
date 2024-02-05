@@ -320,13 +320,25 @@
             var existingTests = localStorage.getItem("testData");
             if (!existingTests) {
                 alert("No save state to export.");
-            } else {
-                try {
-                    var base64Data = btoa(existingTests);
-                    prompt("Copy your save state: ", base64Data);
-                } catch (error) {
-                    alert("Error encoding data: " + error);
-                }
+                return;
+            }
+            try {
+                // Encode the JSON string to Base64
+                var base64Data = btoa(existingTests);
+                // Convert the Base64 string to a format suitable for the Blob constructor
+                var base64EncodedBlob = new Blob([base64Data], {type: "application/octet-stream"});
+                // Create an URL for the blob
+                var url = URL.createObjectURL(base64EncodedBlob);
+                // Create a temporary anchor element and trigger the download
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = "saveState.txt"; // Name the file with .txt extension or as per preference
+                document.body.appendChild(a); // Append to the document
+                a.click(); // Trigger the download
+                document.body.removeChild(a); // Clean up
+                URL.revokeObjectURL(url); // Free up resources
+            } catch (error) {
+                alert("Error preparing data for download: " + error);
             }
         });
 
