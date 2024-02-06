@@ -98,14 +98,14 @@
         function updateTimer() {
             var currentTime = new Date();
             var wallTime = Math.floor((currentTime - startTime) / 1000);
-            var testTime = Math.floor(wallTime - totalPausedTime);
+            var activeTime = Math.floor(wallTime - totalPausedTime);
             if (pauseStartTime) {
-                testTime -= Math.floor((currentTime - pauseStartTime) / 1000);
+                activeTime -= Math.floor((currentTime - pauseStartTime) / 1000);
             }
             document.getElementById("timer").innerText =
                 `Current Time: ${currentTime.toLocaleTimeString()}\n` +
                 `Wall Time: ${formatTime(wallTime)}\n` +
-                `Test Time: ${formatTime(testTime)}`;
+                `Active Time: ${formatTime(activeTime)}`;
         }
         var interval = setInterval(updateTimer, 1000);
 
@@ -113,10 +113,8 @@
             if (pauseStartTime) {
                 totalPausedTime += (new Date() - pauseStartTime) / 1000;
                 pauseStartTime = null;
-                // interval = setInterval(updateTimer, 1000);
                 document.getElementById("toggleTimer").innerText = "Pause";
             } else {
-                // clearInterval(interval);
                 pauseStartTime = new Date();
                 document.getElementById("toggleTimer").innerText = "Unpause";
             }
