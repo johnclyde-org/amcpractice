@@ -4,7 +4,15 @@
     <title>Online Test</title>
     <style>
         body { font-family: Arial, sans-serif; }
-        #timer { position: fixed; top: 10px; right: 10px; font-size: 20px; color: blue; }
+        #timer {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            color: blue;
+            white-space: pre;
+            text-align: right;
+        }
         .questionButton {
             display: inline-block;
             border: 1px solid #999999;
@@ -71,24 +79,45 @@
         <!-- Image for the selected problem -->
     </div>
     <script>
-        var timerRunning = false;
+        var startTime = new Date();
+        var pauseStartTime = new Date();
+        var totalPausedTime = 0;
         var seconds = 0;
-        var interval;
+
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const remainingSeconds = seconds % 60;
+
+            const formattedMinutes = `${minutes < 10 ? '0' : ''}${minutes}`;
+            const formattedSeconds = `${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+
+            return `${hours > 0 ? `${formattedHours}:` : ''}${formattedMinutes}:${formattedSeconds}`;
+        }
 
         function updateTimer() {
             var currentTime = new Date();
-            document.getElementById("timer").innerText = "Current Time: " + currentTime.toLocaleTimeString() +
-                ", Elapsed Time: " + seconds + " seconds";
-            if (timerRunning) seconds++;
+            var wallTime = Math.floor((currentTime - startTime) / 1000);
+            var testTime = Math.floor(wallTime - totalPausedTime);
+            if (pauseStartTime) {
+                testTime -= Math.floor((currentTime - pauseStartTime) / 1000);
+            }
+            document.getElementById("timer").innerText =
+                `Current Time: ${currentTime.toLocaleTimeString()}\n` +
+                `Wall Time: ${formatTime(wallTime)}\n` +
+                `Test Time: ${formatTime(testTime)}`;
         }
+        var interval = setInterval(updateTimer, 1000);
 
         function toggleTimer() {
-            if (!timerRunning) {
-                interval = setInterval(updateTimer, 1000);
-                timerRunning = true;
+            if (pauseStartTime) {
+                totalPausedTime += (new Date() - pauseStartTime) / 1000;
+                pauseStartTime = null;
+                // interval = setInterval(updateTimer, 1000);
                 document.getElementById("toggleTimer").innerText = "Pause";
             } else {
-                timerRunning = false;
+                // clearInterval(interval);
+                pauseStartTime = new Date();
                 document.getElementById("toggleTimer").innerText = "Unpause";
             }
         }
