@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Build Image Collections</title>
+<style>
+.drop-zone {
+  border: 2px dashed #ccc;
+  padding: 10px;
+  margin: 10px 0;
+  min-height: 100px;
+  background-color: #f9f9f9;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.image-container {
+  margin: 5px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  display: inline-block;
+  cursor: grab;
+}
+
+#editableDropZone {
+  border: 2px solid #000;
+  padding: 20px;
+  margin: 10px 0;
+  min-height: 50px;
+  background-color: #f0f0f0;
+  color: #333;
+  cursor: text;
+}
+</style>
+</head>
+<body>
+<div id="editableDropZone" contenteditable="true">Drop links here</div>
+<div class="drop-zone" id="dropZone1">Collection 1</div>
+<div class="drop-zone" id="dropZone2">Collection 2</div>
+<div class="drop-zone" id="dropZone3">Collection 3</div>
+
+<script>
+document.getElementById('editableDropZone').addEventListener('paste', function(e) {
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData('text');
+    const urls = text.match(/\bhttps?:\/\/\S+\b/gi); // Extract URLs
+    if (urls) {
+        urls.forEach(url => {
+            if (url.match(/\bhttps?:\/\/i\.imgur\.com\/\S+\.png\b/)) { // Filter for Imgur .png URLs
+                createImageContainer(url);
+            }
+        });
+    }
+});
+
+function createImageContainer(url) {
+    const container = document.createElement('div');
+    container.className = 'image-container';
+    container.draggable = true;
+    const img = document.createElement('img');
+    img.src = url;
+    img.style.maxWidth = '100px'; // Set max width for images
+    img.style.maxHeight = '100px';
+    container.appendChild(img);
+    document.body.appendChild(container); // Temporarily add to the body
+
+    container.addEventListener('dragstart', function(e) {
+        e.dataTransfer.setData('text/plain', url);
+    });
+}
+
+// Set up drop zones to receive images.
+document.querySelectorAll('.drop-zone').forEach(zone => {
+    zone.addEventListener('dragover', function(e) {
+        e.preventDefault(); // Allow dropping
+    });
+
+    zone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        const url = e.dataTransfer.getData('text/plain');
+        const imageContainers = document.querySelectorAll('.image-container img');
+        imageContainers.forEach(img => {
+            if (img.src === url) {
+                zone.appendChild(img.parentNode);
+            }
+        });
+    });
+});
+</script>
+</body>
+</html>
