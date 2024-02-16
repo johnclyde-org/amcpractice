@@ -177,13 +177,44 @@
 
             solveButton.onclick = function() {
                 var solution = prompt("Your solution for " + questionLabel + ":");
+                updateQuestionButtonBackground(questionLabel, "white");
                 if (solution !== null) {
                     recordAction(currentTestData.set_label, questionLabel, "solve", solution);
                     updateQuestionStatus(questionLabel, "solved");
-                    updateQuestionButtonBackground(questionLabel, "lightblue");
+                    var answers = getAnswersForQuestion(currentTestData.set_label, questionLabel);
+                    if (answers.length < 2) {
+                        updateQuestionButtonBackground(questionLabel, "lightblue");
+                    } else {
+                        var previousSolution = answers[answers.length - 2];
+                        if (solution !== previousSolution.value) {
+                            updateQuestionButtonBackground(questionLabel, "pink");
+                        } else {
+                            updateQuestionButtonBackground(questionLabel, "lightgreen");
+                        }
+                    }
                     navigateToNextQuestion(questionLabel);
                 }
             };
+
+            function getAnswersForQuestion(testLabel, questionLabel) {
+                var testsData = JSON.parse(localStorage.getItem("userActions")) || {};
+                var userActions = testsData[testLabel] || {};
+                let answers = [];
+                for (var question in userActions) {
+                    if (question === questionLabel) {
+                        questionActions = userActions[question];
+                        for (let action of questionActions) {
+                            if (action.action === "guess") {
+                                // Lose the information of anything before the latest guess.
+                                answers = [];
+                            } else if (action.action === "solve") {
+                                answers.push(action);
+                            }
+                        }
+                    }
+                }
+                return answers;
+            }
 
             tldrButton.onclick = function() {
                 recordAction(currentTestData.set_label, questionLabel, "tldr", "Marked as TLDR");
