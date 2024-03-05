@@ -25,29 +25,23 @@ def grep_png_files_from_last_10_days():
         return []
 
 
-class Test(NamedTuple):
-    name: str
-    problems: list[str]
+# Get the list of matching files and print them
+matching_files = grep_png_files_from_last_10_days()
+for i, file in enumerate(matching_files, start=1):
+    print(f"[{i}] {file}")
 
+# Ask which file to parse (placeholder for user input)
+choice = int(input("Which file would you like to parse? "))
+filename = matching_files[choice - 1]
 
-def generate_tests() -> Iterator[Test]:
-    # Get the list of matching files and print them
-    matching_files = grep_png_files_from_last_10_days()
-    for i, file in enumerate(matching_files, start=1):
-        print(f"[{i}] {file}")
+print(f"Parsing {filename} ...")
+with open(filename, "r") as file:
+    data = file.read()
 
-    # Ask which file to parse (placeholder for user input)
-    choice = int(input("Which file would you like to parse? "))
-    filename = matching_files[choice - 1]
+# Find all PNG image URLs using regular expression
+png_urls = re.findall(r'https?://[^\s<>"]+\.png', data)
 
-    print(f"Parsing {filename} ...")
-    with open(filename, "r") as file:
-        data = file.read()
-
-    # Find all PNG image URLs using regular expression
-    png_urls = re.findall(r'https?://[^\s<>"]+\.png', data)
-
-    print(f"Parsed {len(png_urls)} PNG URLs.")
+print(f"Parsed {len(png_urls)} PNG URLs.")
 
 test_type_input = (
     input("Are we building practice problem set for (A)MC, (M)ATHCOUNTS, or A(R)ML? ")
@@ -57,6 +51,8 @@ test_type_input = (
 test_type = {"a": "AMC", "m": "Mathcounts", "r": "ARML"}.get(test_type_input, "Unknown")
 
 year = input("Please label the problem set with a year [2024]: ").strip()
+
+year = int(input("Please label the problem set with a year [2024]: ").strip())
 
 labels = ["-"]
 if test_type == "Mathcounts":
@@ -88,6 +84,7 @@ if test_type == "Mathcounts":
         test_name = f"{year} {full_level} {full_round} Round {first_label}-{last_label}"
         png_urls = png_urls[2 * last_problem - 4:2 * last_problem]
 elif test_type == "AMC":
+    test_name = f"{year} {full_level} {full_round} Round {first_label}-{last_label}"
     amc_type = int(
         input(
             "1) AMC-8\n2) AMC-10\n3) AMC-12\n4) AIME\n5) USAJMO\n6) USAMO\n7) IMO\nWhich one: "
@@ -104,31 +101,8 @@ elif test_type == "ARML":
     print(f"Level: {level}, Round type: {round_type}")
     year = int(input("Please label the problem set with a year [2024]: ").strip())
 
-    labels = ["-"]
-    if test_type == "m":
-        level = (
-            input("Is it for (N)ationals, (S)tate, (C)hapter, or sc(H)ool: ").strip().lower()
-        )
-        round_type = (
-            input("Is it for (S)print, (T)arget, t(E)am, or (C)ountdown? ").strip().lower()
-        )
-        full_level = {"n": "National", "s": "State", "c": "Chapter", "h": "School"}.get(
-            level, "???"
-        )
-        full_round = {"s": "Sprint", "t": "Target", "e": "Team", "c": "Countdown"}.get(
-            round_type, "Unknown"
-        )
-        test_name = f"{year} {full_level} {full_round} Round"
-        labels.extend(["A", "B", "C", "D", "E"])
-        for problem in range(1, 31):
-            labels.append(str(problem))
-    elif test_type == "amc":
-        amc_type = int(
-            input(
-                "1) AMC-8\n2) AMC-10\n3) AMC-12\n4) AIME\n5) USAJMO\n6) USAMO\n7) IMO\nWhich one: "
-            ).strip()
-        )
-        test_name = f"{year} AMC Practice"
+if len(labels) == len(png_urls):
+    input(f"Confirm labels - {labels} (enter to accept):")
 
     # Example of proceeding based on the choices
     print(f"Generating {test_name}")
