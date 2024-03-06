@@ -44,7 +44,9 @@ png_urls = re.findall(r'https?://[^\s<>"]+\.png', data)
 print(f"Parsed {len(png_urls)} PNG URLs.")
 
 test_type = (
-    input("Are we building practice problem set for (A)MC or (M)ATHCOUNTS? ").strip().lower()
+    input("Are we building practice problem set for (A)MC or (M)ATHCOUNTS? ")
+    .strip()
+    .lower()
 )
 
 year = int(input("Please label the problem set with a year [2024]: ").strip())
@@ -52,7 +54,9 @@ year = int(input("Please label the problem set with a year [2024]: ").strip())
 labels = ["-"]
 if test_type == "m":
     level = (
-        input("Is it for (N)ationals, (S)tate, (C)hapter, or sc(H)ool: ").strip().lower()
+        input("Is it for (N)ationals, (S)tate, (C)hapter, or sc(H)ool: ")
+        .strip()
+        .lower()
     )
     round_type = (
         input("Is it for (S)print, (T)arget, t(E)am, or (C)ountdown? ").strip().lower()
@@ -91,5 +95,8 @@ problems = [
 data = {"set_label": test_name, "problems": problems}
 print(json.dumps(data, indent=4))
 print()
-b64data = base64.b64encode(json.dumps(data).replace(" ", "").encode()).decode()
+test_name_no_spaces = test_name.replace(" ", "")
+b64data = base64.b64encode(
+    json.dumps(data).replace(" ", "").replace(test_name_no_spaces, test_name).encode()
+).decode()
 print(f"Here is a save state you can share for the test:\n{b64data}")
