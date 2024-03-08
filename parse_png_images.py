@@ -71,6 +71,16 @@ if test_type == "m":
     labels.extend(["A", "B", "C", "D", "E"])
     for problem in range(1, 31):
         labels.append(str(problem))
+
+    # Wipe everything if it's Target and handle the special case.
+    if full_round == "Target":
+        last_problem = int(input("What's the last problem you want to print (e.g. 4 for problems 3-4): ").strip())
+        first_label = str(last_problem - 1)
+        last_label = str(last_problem)
+        labels = ["-", "*", first_label, last_label]
+        test_name = f"{year} {full_level} {full_round} Round {first_label}-{last_label}"
+        png_urls = png_urls[2 * last_problem - 4:2 * last_problem]
+
 elif test_type == "amc":
     amc_type = int(
         input(
