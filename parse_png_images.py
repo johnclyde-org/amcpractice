@@ -88,8 +88,7 @@ elif test_type == "AMC":
         ).strip()
     )
     test_name = f"{year} {amc_type_name} Practice"
-    
-# Example of proceeding based on the choices
+
 print(f"Generating {test_name}")
 if test_type == "Mathcounts":
     print(f"Level: {level}, Round type: {round_type}")
