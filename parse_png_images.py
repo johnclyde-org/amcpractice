@@ -43,16 +43,17 @@ png_urls = re.findall(r'https?://[^\s<>"]+\.png', data)
 
 print(f"Parsed {len(png_urls)} PNG URLs.")
 
-test_type = (
-    input("Are we building practice problem set for (A)MC or (M)ATHCOUNTS? ")
+test_type_input = (
+    input("Are we building practice problem set for (A)MC, (M)ATHCOUNTS, or A(R)ML? ")
     .strip()
     .lower()
 )
+test_type = {"a": "AMC", "m": "Mathcounts", "r": "ARML"}.get(test_type_input, "Unknown")
 
-year = int(input("Please label the problem set with a year [2024]: ").strip())
+year = input("Please label the problem set with a year [2024]: ").strip()
 
 labels = ["-"]
-if test_type == "m":
+if test_type == "Mathcounts":
     level = (
         input("Is it for (N)ationals, (S)tate, (C)hapter, or sc(H)ool: ")
         .strip()
@@ -80,21 +81,21 @@ if test_type == "m":
         labels = ["-", "*", first_label, last_label]
         test_name = f"{year} {full_level} {full_round} Round {first_label}-{last_label}"
         png_urls = png_urls[2 * last_problem - 4:2 * last_problem]
-
-elif test_type == "amc":
+elif test_type == "AMC":
     amc_type = int(
         input(
             "1) AMC-8\n2) AMC-10\n3) AMC-12\n4) AIME\n5) USAJMO\n6) USAMO\n7) IMO\nWhich one: "
         ).strip()
     )
-    test_name = f"{year} AMC Practice"
+    test_name = f"{year} {amc_type_name} Practice"
 
-# Example of proceeding based on the choices
 print(f"Generating {test_name}")
-if test_type == "mathcounts":
+if test_type == "Mathcounts":
     print(f"Level: {level}, Round type: {round_type}")
-elif test_type == "amc":
+elif test_type == "AMC":
     print(f"AMC Type: {amc_type}")
+elif test_type == "ARML":
+    print(f"Level: {level}, Round type: {round_type}")
 
 if len(labels) == len(png_urls):
     input(f"Confirm labels - {labels} (enter to accept):")
