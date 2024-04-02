@@ -51,9 +51,6 @@ test_type_input = (
 test_type = {"a": "AMC", "m": "Mathcounts", "r": "ARML"}.get(test_type_input, "Unknown")
 
 year = input("Please label the problem set with a year [2024]: ").strip()
-
-year = int(input("Please label the problem set with a year [2024]: ").strip())
-
 labels = ["-"]
 if test_type == "Mathcounts":
     level = (
@@ -62,16 +59,16 @@ if test_type == "Mathcounts":
         .lower()
     )
     round_type = (
-        input("Is it for (S)print, (T)arget, t(E)am, or (C)ountdown? ").strip().lower()
+        input("Is it for (S)print, (T)arget, t(E)am, (C)ountdown, or (F)irst 10? ").strip().lower()
     )
     full_level = {"n": "National", "s": "State", "c": "Chapter", "h": "School"}.get(
         level, "???"
     )
-    full_round = {"s": "Sprint", "t": "Target", "e": "Team", "c": "Countdown"}.get(
+    full_round = {"s": "Sprint", "t": "Target", "e": "Team", "c": "Countdown", "f": "First Ten Challenge"}.get(
         round_type, "Unknown"
     )
     test_name = f"{year} {full_level} {full_round} Round"
-    labels.extend(["A", "B", "C", "D", "E"])
+    labels.extend(["A"])
     for problem in range(1, 31):
         labels.append(str(problem))
 
@@ -90,6 +87,7 @@ elif test_type == "AMC":
             "1) AMC-8\n2) AMC-10\n3) AMC-12\n4) AIME\n5) USAJMO\n6) USAMO\n7) IMO\nWhich one: "
         ).strip()
     )
+    amc_type_name = ['-', 'AMC-8', 'AMC-10', 'AMC-12', 'AIME', 'USAJMO', 'USAMO', 'IMO'][int(amc_type)]
     test_name = f"{year} {amc_type_name} Practice"
 
 print(f"Generating {test_name}")
@@ -97,24 +95,31 @@ if test_type == "Mathcounts":
     print(f"Level: {level}, Round type: {round_type}")
 elif test_type == "AMC":
     print(f"AMC Type: {amc_type}")
+    if len(png_urls) == 11:
+        test_name = f"First Ten Challenge - {test_name}"
+        for problem in range(1, 11):
+            labels.append(str(problem))
+    if len(png_urls) == 26:
+        test_name = f"{amc_type_name} {year}"
+        for problem in range(1, 26):
+            labels.append(str(problem))
 elif test_type == "ARML":
     print(f"Level: {level}, Round type: {round_type}")
     year = int(input("Please label the problem set with a year [2024]: ").strip())
+elif full_round == "First Ten Challenge":
+    labels = ["-"] + [str(problem) for problem in range(1, 11)]
+    test_name = f"First Ten Challenge - {full_level} {year}"
+
+# labels = labels[:1] + labels[11:21]
+# png_urls = png_urls[:1] + png_urls[11:21]
+# test_name = "AMC-12 2002A problems 11-20"
 
 if len(labels) == len(png_urls):
     input(f"Confirm labels - {labels} (enter to accept):")
 
-    # Example of proceeding based on the choices
-    print(f"Generating {test_name}")
-    if test_type == "mathcounts":
-        print(f"Level: {level}, Round type: {round_type}")
-    elif test_type == "amc":
-        print(f"AMC Type: {amc_type}")
-
-    problems = [
-        {"label": label, "link": png_url} for label, png_url in zip(labels, png_urls)
-    ]
-
+problems = [
+    {"label": label, "link": png_url} for label, png_url in zip(labels, png_urls)
+]
 data = {"set_label": test_name, "problems": problems}
 print(json.dumps(data, indent=4))
 print()
@@ -123,14 +128,3 @@ b64data = base64.b64encode(
     json.dumps(data).replace(" ", "").replace(test_name_no_spaces, test_name).encode()
 ).decode()
 print(f"Here is a save state you can share for the test:\n{b64data}")
-
-for test in generate_tests():
-    data = {"set_label": test.name, "problems": test.problems}
-    labels = problem["label"] for problem in test.problems
-    if len(labels) == len(png_urls):
-        input(f"Confirm labels - {labels} (enter to accept):")
-
-        print(json.dumps(data, indent=4))
-        print()
-        b64data = base64.b64encode(json.dumps(data).replace(" ", "").encode()).decode()
-        print(f"Here is a save state you can share for the test:\n{b64data}")
