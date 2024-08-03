@@ -81,7 +81,6 @@ if test_type == "Mathcounts":
         test_name = f"{year} {full_level} {full_round} Round {first_label}-{last_label}"
         png_urls = png_urls[2 * last_problem - 4:2 * last_problem]
 elif test_type == "AMC":
-    test_name = f"{year} {full_level} {full_round} Round {first_label}-{last_label}"
     amc_type = int(
         input(
             "1) AMC-8\n2) AMC-10\n3) AMC-12\n4) AIME\n5) USAJMO\n6) USAMO\n7) IMO\nWhich one: "
@@ -99,6 +98,10 @@ elif test_type == "AMC":
         test_name = f"First Ten Challenge - {test_name}"
         for problem in range(1, 11):
             labels.append(str(problem))
+    if len(png_urls) == 14:
+        test_name = f"First Ten Challenge - {test_name}"
+        for problem in range(1, 19):
+            labels.append(str(problem))
     if len(png_urls) == 26:
         test_name = f"{amc_type_name} {year}"
         for problem in range(1, 26):
@@ -106,9 +109,11 @@ elif test_type == "AMC":
 elif test_type == "ARML":
     print(f"Level: {level}, Round type: {round_type}")
     year = int(input("Please label the problem set with a year [2024]: ").strip())
-elif full_round == "First Ten Challenge":
-    labels = ["-"] + [str(problem) for problem in range(1, 11)]
-    test_name = f"First Ten Challenge - {full_level} {year}"
+
+# test_name = "First Ten Challenge"
+# if test_name == "First Ten Challenge":
+#     labels = ["-"] + [str(problem) for problem in range(1, 11)]
+#     # test_name = f"First Ten Challenge - {full_level} {year}"
 
 # labels = labels[:1] + labels[11:21]
 # png_urls = png_urls[:1] + png_urls[11:21]
